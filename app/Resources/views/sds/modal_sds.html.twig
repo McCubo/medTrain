@@ -1,0 +1,80 @@
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+    <h4 class="modal-title" id="myModalLabel">SDS Binder Form</h4>
+</div>
+<div class="modal-body">
+    <form class="form-horizontal" id="record_form" data-action_url="{{path('do_save_record')}}" method="post" enctype="multipart/form-data">
+        <input type="hidden" id="record_id" name="record_id" value="{{sdsRequest.id}}" />
+        <div class="form-group">
+            <label for="input_title" class="col-sm-3 control-label">Title</label>
+            <div class="col-sm-9">
+                <input type="text" class="form-control" id="input_title" name="input_title" placeholder="Title" value="{{sdsRequest.title}}">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="input_manufacturer" class="col-sm-3 control-label">Manufacturer</label>
+            <div class="col-sm-9">
+                <input type="text" class="form-control" id="input_manufacturer" name="input_manufacturer" placeholder="Manufacturer" value="{{sdsRequest.manufacturer}}">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="input_item_msds_num" class="col-sm-3 control-label">Item # / SDS #</label>
+            <div class="col-sm-9">
+                <input type="number" class="form-control" id="input_item_msds_num" min="0" name="input_item_msds_num" placeholder="Item # / SDS #" value="{{sdsRequest.item_msds_num}}">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="input_file" class="col-sm-3 control-label">File</label>
+            <div class="col-sm-9">
+                <input type="file" id="file_doc" name="upload_file[file_doc]">
+            </div>
+        </div>
+        <div class="form-group">            
+            <div class="col-sm-12">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary" id="send_form_button">Submit Form</button>
+            </div>
+        </div>            
+    </form>
+</div>
+<script>
+    $(document).ready(function () {
+        $("form#record_form").submit(function () {
+            var formData = new FormData(this);
+            var sAction = $(this).data("action_url");
+            $.ajax({
+                url: sAction,
+                data: formData,
+                type: 'POST',
+                async: false,
+                success: function (data) {
+                    for (var c = 0; c < data.error_list.length; c++) {
+                        alert(data.error_list[c]);
+                    }
+                    if (data.error_list.length === 0) {
+                        alert("Record has been successfully saved");
+                    }
+                    console.log(data.oData.isNew);
+                    console.log(table);
+                    if (data.oData.isNew === 1) {
+                        var rowNode = table.row.add([
+                            data.oData.title,
+                            data.oData.item,
+                            data.oData.man,
+                            "New Record"
+                        ]).draw().node();
+                        $(rowNode)
+                                .css('color', 'red')
+                                .animate({color: 'black'});
+                    }
+                    $("#record_modal").modal("hide");
+                },
+                cache: false,
+                contentType: false,
+                processData: false
+
+            });
+            return false;
+        });
+    });
+</script>
